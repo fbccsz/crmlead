@@ -17,14 +17,15 @@ app = FastAPI(title="CRMLead API", version="1.0.0")
 
 def _allowed_origins() -> list[str]:
     raw = os.getenv("ALLOW_ORIGINS", "")
-    if raw.strip():
-        return [o.strip() for o in raw.split(",") if o.strip()]
-    return [
+    env_items = [o.strip() for o in raw.split(",") if o.strip()] if raw.strip() else []
+    defaults = [
         "http://localhost:5173",
         "http://localhost:3000",
         "https://crmlead.appwrite.network",
+        "https://crmlead.appwrite.global",
     ]
-
+    # Mantem defaults mesmo quando ALLOW_ORIGINS esta setado para evitar lock acidental.
+    return list(dict.fromkeys(env_items + defaults))
 
 # CORS configuravel por variavel de ambiente (Render)
 app.add_middleware(
@@ -32,7 +33,7 @@ app.add_middleware(
     allow_origins=_allowed_origins(),
     allow_origin_regex=os.getenv(
         "ALLOW_ORIGIN_REGEX",
-        r"https://.*\\.appwrite\\.(network|global)",
+        r"https://.*\.appwrite\.(network|global)",
     ),
     allow_credentials=True,
     allow_methods=["*"],
@@ -288,3 +289,5 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
