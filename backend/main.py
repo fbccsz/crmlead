@@ -177,9 +177,7 @@ async def login(credentials: LoginRequest):
     if not credentials.email or not credentials.password:
         raise HTTPException(status_code=400, detail="Email e password obrigatorios")
 
-    if credentials.password != "demo":
-        raise HTTPException(status_code=401, detail="Credenciais invalidas")
-
+    # Modo demo: aceita qualquer senha nao vazia.
     return _build_session(credentials.email)
 
 
@@ -289,6 +287,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 
