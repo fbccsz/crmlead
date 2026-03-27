@@ -29,15 +29,45 @@ export function AgendaPage() {
   const { loading, error, upcoming, past, markDone, postponeOneDay } =
     useAgendaFeed()
 
+  const visitas = upcoming.filter((event) => event.type === 'visita').length
+  const followups = upcoming.filter((event) => event.type === 'followup').length
+  const ligacoes = upcoming.filter((event) => event.type === 'ligacao').length
+  const nextEvent = upcoming
+    .slice()
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
+
   return (
     <main className="layout">
       <header className="hero">
         <p className="eyebrow">Agenda</p>
         <h1>Compromissos comerciais</h1>
         <p className="subtitle">
-          Timeline de visitas, ligacoes e follow-ups, pronta para backend real.
+          Ritmo de atendimento com foco em proximas acoes e continuidade de follow-up.
         </p>
       </header>
+
+      <section className="agenda-command">
+        <article className="highlight-card highlight-ok">
+          <p className="highlight-label">Proximos eventos</p>
+          <strong className="highlight-value">{upcoming.length}</strong>
+          <p className="highlight-sub">Compromissos ativos na fila comercial.</p>
+        </article>
+        <article className="highlight-card">
+          <p className="highlight-label">Visitas</p>
+          <strong className="highlight-value">{visitas}</strong>
+          <p className="highlight-sub">Reunioes presenciais ou tours marcados.</p>
+        </article>
+        <article className="highlight-card">
+          <p className="highlight-label">Follow-ups</p>
+          <strong className="highlight-value">{followups + ligacoes}</strong>
+          <p className="highlight-sub">Ligacoes e retomadas de negociacao.</p>
+        </article>
+        <article className="highlight-card highlight-warn">
+          <p className="highlight-label">Proxima acao</p>
+          <strong className="highlight-value">{nextEvent ? formatDate(nextEvent.date) : '--'}</strong>
+          <p className="highlight-sub">{nextEvent ? nextEvent.title : 'Sem evento futuro no momento.'}</p>
+        </article>
+      </section>
 
       <section className="panel">
         <h2>Proximos eventos</h2>
@@ -51,6 +81,7 @@ export function AgendaPage() {
                 <p className="agenda-sub">
                   {eventLabel(event.type)} · {formatDate(event.date)}
                 </p>
+                <p className="pipeline-sub">ID: {event.id}</p>
               </div>
               <div className="agenda-actions">
                 <strong>{event.clientName ?? 'Sem cliente'}</strong>
@@ -74,7 +105,12 @@ export function AgendaPage() {
             </article>
           ))}
           {!loading && !error && upcoming.length === 0 ? (
-            <p className="muted">Nenhum evento futuro.</p>
+            <div className="empty-state" role="status" aria-live="polite">
+              <p className="empty-state-title">Sem eventos futuros</p>
+              <p className="empty-state-subtitle">
+                A agenda esta livre. Novos compromissos aparecerao aqui.
+              </p>
+            </div>
           ) : null}
         </div>
       </section>
@@ -94,7 +130,12 @@ export function AgendaPage() {
             </article>
           ))}
           {!loading && !error && past.length === 0 ? (
-            <p className="muted">Nenhum evento concluido.</p>
+            <div className="empty-state" role="status" aria-live="polite">
+              <p className="empty-state-title">Sem historico recente</p>
+              <p className="empty-state-subtitle">
+                Assim que eventos forem concluidos, este bloco mostrara o historico.
+              </p>
+            </div>
           ) : null}
         </div>
       </section>

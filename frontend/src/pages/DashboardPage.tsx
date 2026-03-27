@@ -7,6 +7,9 @@ export function DashboardPage() {
   const { funnel, conversionRate, totalLeads } = useDashboardFunnel(leads)
 
   const healthyApi = health?.status?.toLowerCase() === 'ok'
+  const lowConversion = conversionRate < 25
+  const proposalPressure = (summary?.openProposals ?? 0) > (summary?.closedDeals ?? 0)
+  const hasFunnelData = funnel.some((item) => item.total > 0)
 
   return (
     <main className="layout">
@@ -36,6 +39,33 @@ export function DashboardPage() {
           <p className="highlight-label">Saude da API</p>
           <strong className="highlight-value">{health?.status ?? '--'}</strong>
           <p className="highlight-sub">Versao: {health?.version ?? 'indisponivel'}.</p>
+        </article>
+      </section>
+
+      <section className="dashboard-ribbon" aria-label="Alertas operacionais">
+        <article className={`dashboard-ribbon-item ${healthyApi ? 'ribbon-good' : 'ribbon-bad'}`}>
+          <p className="highlight-label">Saude de integracao</p>
+          <p className="dashboard-ribbon-text">
+            {healthyApi
+              ? 'API respondendo dentro do esperado para operacao diaria.'
+              : 'API com risco de indisponibilidade. Priorize monitoramento imediato.'}
+          </p>
+        </article>
+        <article className={`dashboard-ribbon-item ${lowConversion ? 'ribbon-warn' : 'ribbon-good'}`}>
+          <p className="highlight-label">Ritmo de conversao</p>
+          <p className="dashboard-ribbon-text">
+            {lowConversion
+              ? 'Conversao abaixo da faixa-alvo. Reforce follow-up nas oportunidades quentes.'
+              : 'Conversao em faixa saudavel para o volume atual de leads.'}
+          </p>
+        </article>
+        <article className={`dashboard-ribbon-item ${proposalPressure ? 'ribbon-warn' : 'ribbon-good'}`}>
+          <p className="highlight-label">Pressao de propostas</p>
+          <p className="dashboard-ribbon-text">
+            {proposalPressure
+              ? 'Ha mais propostas abertas do que fechamentos. Acompanhe pendencias comerciais.'
+              : 'Esteira de propostas equilibrada com o ritmo de fechamento.'}
+          </p>
         </article>
       </section>
 
@@ -72,6 +102,15 @@ export function DashboardPage() {
             </div>
           </div>
         ) : null}
+
+        {!loading && !error && (!health || !summary) ? (
+          <div className="empty-state" role="status" aria-live="polite">
+            <p className="empty-state-title">Dados de integracao indisponiveis</p>
+            <p className="empty-state-subtitle">
+              Verifique a conectividade da API no Setup para carregar os indicadores.
+            </p>
+          </div>
+        ) : null}
       </section>
 
       <section className="panel">
@@ -80,20 +119,29 @@ export function DashboardPage() {
           Performance atual: <strong>{conversionRate}%</strong> com{' '}
           <strong>{totalLeads}</strong> leads mapeados.
         </p>
-        <div className="funnel-list">
-          {funnel.map((item) => (
-            <div key={item.stage} className={`funnel-item tone-${stageTone(item.stage)}`}>
-              <div className="funnel-head">
-                <span>{item.stage}</span>
-                <strong>{item.total}</strong>
+        {hasFunnelData ? (
+          <div className="funnel-list">
+            {funnel.map((item) => (
+              <div key={item.stage} className={`funnel-item tone-${stageTone(item.stage)}`}>
+                <div className="funnel-head">
+                  <span>{item.stage}</span>
+                  <strong>{item.total}</strong>
+                </div>
+                <div className="funnel-track" aria-hidden="true">
+                  <div className="funnel-fill" style={{ width: `${item.ratio}%` }} />
+                </div>
+                <small>{item.ratio}% da base</small>
               </div>
-              <div className="funnel-track" aria-hidden="true">
-                <div className="funnel-fill" style={{ width: `${item.ratio}%` }} />
-              </div>
-              <small>{item.ratio}% da base</small>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state" role="status" aria-live="polite">
+            <p className="empty-state-title">Sem dados para o funil</p>
+            <p className="empty-state-subtitle">
+              Assim que novos leads entrarem no pipeline, a distribuicao por etapa aparecera aqui.
+            </p>
+          </div>
+        )}
       </section>
     </main>
   )

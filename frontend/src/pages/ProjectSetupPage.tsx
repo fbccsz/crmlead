@@ -38,6 +38,10 @@ function formatHistoryStatusLabel(status: ApiCheckHistoryItem['status']): string
   return status === 'success' ? 'Sucesso' : 'Falha'
 }
 
+function historyStatusClass(status: ApiCheckHistoryItem['status']): string {
+  return status === 'success' ? 'history-status-chip history-status-success' : 'history-status-chip history-status-error'
+}
+
 export function ProjectSetupPage() {
   const [selectedMode, setSelectedMode] = useState<'mock' | 'real'>(
     appEnv.useMockApi ? 'mock' : 'real',
@@ -76,6 +80,8 @@ export function ProjectSetupPage() {
   const normalizedHealthPath = normalizeHealthPath(healthPathInput)
   const hasApiCheckHistory =
     apiCheckStatus !== 'idle' || apiCheckedAt !== null || apiLatencyMs !== null
+  const checksWithError = apiRecentChecks.filter((item) => item.status === 'error').length
+  const checksWithSuccess = apiRecentChecks.filter((item) => item.status === 'success').length
 
   const displayedHistory = useMemo(() => {
     const filtered = apiRecentChecks.filter((item) => {
@@ -435,6 +441,29 @@ export function ProjectSetupPage() {
         </p>
       </header>
 
+      <section className="setup-command">
+        <article className="highlight-card highlight-ok">
+          <p className="highlight-label">Progresso MVP</p>
+          <strong className="highlight-value">{overallCompletion}%</strong>
+          <p className="highlight-sub">Entrega acumulada no escopo atual.</p>
+        </article>
+        <article className="highlight-card">
+          <p className="highlight-label">Restante estimado</p>
+          <strong className="highlight-value">{overallRemaining}%</strong>
+          <p className="highlight-sub">Backlog para chegar ao target planejado.</p>
+        </article>
+        <article className="highlight-card">
+          <p className="highlight-label">Fonte ativa</p>
+          <strong className="highlight-value">{appEnv.useMockApi ? 'Mock' : 'Real'}</strong>
+          <p className="highlight-sub">Modo de dados utilizado na sessao atual.</p>
+        </article>
+        <article className={`highlight-card ${checksWithError > 0 ? 'highlight-warn' : 'highlight-ok'}`}>
+          <p className="highlight-label">Diagnosticos API</p>
+          <strong className="highlight-value">{apiRecentChecks.length}</strong>
+          <p className="highlight-sub">{checksWithSuccess} sucesso(s) e {checksWithError} falha(s) recentes.</p>
+        </article>
+      </section>
+
       <section className="panel">
         <h2>Status de Entrega</h2>
         <p className="muted table-subtitle">
@@ -631,11 +660,16 @@ export function ProjectSetupPage() {
             </p>
             <ul className="api-history-list">
               {displayedHistory.map((item, index) => (
-                <li key={`${item.checkedAt}-${index}-${item.message}`}>
-                  <strong>{formatHistoryStatusLabel(item.status)}</strong>
-                  <span>{item.checkedAt}</span>
-                  <span>{item.latencyMs !== null ? `${item.latencyMs} ms` : 'latencia indisponivel'}</span>
-                  <span>{item.testedUrl ?? 'URL nao registrada'}</span>
+                <li key={`${item.checkedAt}-${index}-${item.message}`} className="api-history-card">
+                  <div className="api-history-head">
+                    <span className={historyStatusClass(item.status)}>
+                      {formatHistoryStatusLabel(item.status)}
+                    </span>
+                    <span className="history-meta-chip">{item.latencyMs !== null ? `${item.latencyMs} ms` : 'latencia indisponivel'}</span>
+                  </div>
+                  <p className="history-meta-row">{item.checkedAt}</p>
+                  <p className="history-url">{item.testedUrl ?? 'URL nao registrada'}</p>
+                  <p className="history-message">{item.message}</p>
                   <div className="history-actions">
                     <button
                       type="button"
@@ -656,9 +690,12 @@ export function ProjectSetupPage() {
               ))}
             </ul>
             {displayedHistory.length === 0 && (
-              <p className="muted history-empty">
-                Nenhuma checagem encontrada para o filtro selecionado.
-              </p>
+              <div className="empty-state history-empty" role="status" aria-live="polite">
+                <p className="empty-state-title">Sem checagens para este filtro</p>
+                <p className="empty-state-subtitle">
+                  Altere filtro ou ordenacao para revisar outras execucoes salvas.
+                </p>
+              </div>
             )}
           </div>
         )}

@@ -25,6 +25,8 @@ export function LoginPage() {
     return value.length > 3 && value.includes('@') && value.includes('.')
   }, [email])
 
+  const credentialsReady = emailLooksValid && password.trim().length >= 4
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitting(true)
@@ -55,6 +57,15 @@ export function LoginPage() {
         <p className="subtitle">
           Plataforma comercial com autenticacao pronta para operacao real.
         </p>
+
+        <div className={`auth-readiness ${credentialsReady ? 'auth-readiness-ok' : 'auth-readiness-warn'}`}>
+          <span className="auth-readiness-dot" aria-hidden="true" />
+          <p>
+            {credentialsReady
+              ? 'Credenciais com formato valido para login.'
+              : 'Preencha e-mail valido e senha para liberar o acesso.'}
+          </p>
+        </div>
 
         <div className="auth-quick-profiles" aria-label="Perfis rapidos para demo">
           <button
@@ -115,6 +126,12 @@ export function LoginPage() {
         </form>
 
         {error ? <p className="error">Falha: {error}</p> : null}
+
+        <ul className="auth-guidelines" aria-label="Orientacoes de acesso demo">
+          <li>Perfil corretor: corretor@crmlead.local</li>
+          <li>Perfil gestor: gestor@crmlead.local</li>
+          <li>Senha demo padrao: 123456</li>
+        </ul>
 
         <p className="muted">
           Dica demo: qualquer senha funciona. Se o e-mail contiver "gestor", o perfil

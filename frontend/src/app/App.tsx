@@ -18,17 +18,9 @@ const ProjectSetupPage = lazy(() => import('../pages/ProjectSetupPage').then(m =
 
 function LoadingFallback() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontSize: '14px',
-        color: '#666',
-      }}
-    >
-      Carregando...
+    <div className="loading-shell" role="status" aria-live="polite">
+      <span className="loading-orb" aria-hidden="true" />
+      <p className="loading-text">Carregando modulo...</p>
     </div>
   )
 }
