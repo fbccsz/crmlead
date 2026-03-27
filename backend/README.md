@@ -84,3 +84,10 @@ Pode incluir multiplos dominios separados por virgula.
 Exemplo real:
 
 - `ALLOW_ORIGINS=https://crmlead.appwrite.global,https://www.crmlead.com`
+
+## Python no Render
+
+Para evitar erro de build do pydantic-core com Python 3.14, este backend fixa a versao no arquivo `runtime.txt`:
+
+- `python-3.11.11`
+
