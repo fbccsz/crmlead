@@ -1,4 +1,4 @@
-# CRMLead Backend - FastAPI
+﻿# CRMLead Backend - FastAPI
 
 MVP backend para CRMLead com endpoints para Dashboard, Leads, Agenda e Auth.
 
@@ -14,7 +14,7 @@ python -m venv .venv
 # Ativar (Mac/Linux)
 source .venv/bin/activate
 
-# Instalar dependências
+# Instalar dependencias
 pip install -r requirements.txt
 ```
 
@@ -30,24 +30,24 @@ Acessar: http://localhost:8000/docs (Swagger UI interativo)
 
 ## Endpoints
 
-### Públicos
+### Publicos
 - `GET /health` - Health check
-- `POST /login` - Autenticação
+- `POST /login` - Autenticacao
 
 ### Protegidos (depois)
 - `GET /dashboard/summary` - Resumo comercial
 - `GET /leads` - Listar leads
-- `GET /leads/{id}` - Lead específico
+- `GET /leads/{id}` - Lead especifico
 - `GET /events` - Agenda
 - `POST /events/{id}/complete` - Concluir evento
 - `PUT /events/{id}/reschedule` - Reagendar
 
 ## Status
 
-✅ MVP endpoints funcionando
-⏳ Autenticação JWT (próximo)
-⏳ Banco de dados PostgreSQL (próximo)
-⏳ Validações e tratamento de erros (próximo)
+- MVP endpoints funcionando
+- Autenticacao JWT (proximo)
+- Banco de dados PostgreSQL (proximo)
+- Validacoes e tratamento de erros (proximo)
 
 ## Teste com curl
 
@@ -64,13 +64,23 @@ curl -X POST http://localhost:8000/login \
 curl http://localhost:8000/leads
 ```
 
-## Integração com Frontend
+## Integracao com Frontend
 
-O frontend já está configurado em `frontend/src/shared/config/env.ts` para conectar a este backend:
+O frontend esta configurado para conectar neste backend:
 
 ```env
 VITE_USE_MOCK_API=false
-VITE_API_BASE_URL=http://localhost:8000/api
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
-Mudá para `/api` depois ou ajuste os endpoints.
+## CORS no Render
+
+No painel do Render (Environment), adicione a variavel:
+
+- `ALLOW_ORIGINS=https://SEU_SITE.appwrite.global,http://localhost:5173`
+
+Pode incluir multiplos dominios separados por virgula.
+
+Exemplo real:
+
+- `ALLOW_ORIGINS=https://crmlead.appwrite.global,https://www.crmlead.com`
