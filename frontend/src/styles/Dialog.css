@@ -1,0 +1,149 @@
+/* Dialog/Modal Component */
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+  animation: fadeIn 200ms ease both;
+}
+
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background: #fffdf9;
+  border: 1px solid #d8d1c2;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  max-width: 90vw;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: scaleIn 300ms ease both;
+}
+
+.dialog-content {
+  padding: 24px;
+}
+
+.dialog-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dialog-description {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.dialog-body {
+  margin-bottom: 16px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #ece3d4;
+}
+
+.dialog-btn {
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.dialog-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dialog-btn-cancel {
+  border-color: #d8d1c2;
+  background: #f5f1e8;
+  color: #334155;
+}
+
+.dialog-btn-cancel:hover:not(:disabled) {
+  background: #ece5d7;
+  border-color: #c9c1b2;
+}
+
+.dialog-btn-confirm {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.dialog-btn-confirm:hover:not(:disabled) {
+  background: #0d6660;
+  border-color: #0d6660;
+}
+
+.dialog-btn-danger {
+  border-color: #dc2626;
+  background: #dc2626;
+}
+
+.dialog-btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Mobile Dialog */
+@media (max-width: 640px) {
+  .dialog {
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .dialog-content {
+    padding: 20px;
+  }
+
+  .dialog-actions {
+    padding: 14px 20px;
+    flex-direction: column-reverse;
+  }
+
+  .dialog-btn {
+    width: 100%;
+  }
+}

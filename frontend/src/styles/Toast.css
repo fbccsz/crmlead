@@ -1,0 +1,144 @@
+/* Toast/Notification System */
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 300px;
+  max-width: 500px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid;
+  backdrop-filter: blur(10px);
+  animation: slideInRight 300ms ease both;
+  pointer-events: all;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.toast-icon {
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  margin-left: 12px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity 200ms ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Success Toast */
+.toast-success {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-color: #86efac;
+  color: #166534;
+}
+
+.toast-success .toast-icon {
+  color: #16a34a;
+}
+
+/* Error Toast */
+.toast-error {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.toast-error .toast-icon {
+  color: #dc2626;
+}
+
+/* Warning Toast */
+.toast-warning {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+.toast-warning .toast-icon {
+  color: #d97706;
+}
+
+/* Info Toast */
+.toast-info {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border-color: #7dd3fc;
+  color: #0c4a6e;
+}
+
+.toast-info .toast-icon {
+  color: #0284c7;
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+/* Mobile Toast */
+@media (max-width: 640px) {
+  .toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
+}
