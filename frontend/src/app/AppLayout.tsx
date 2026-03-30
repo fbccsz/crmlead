@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 
@@ -26,12 +27,17 @@ export function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { session, logout } = useAuthSession()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const todayLabel = new Date().toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
   })
   const currentPage = resolveCurrentPage(location.pathname)
+
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [location.pathname])
 
   async function handleLogout() {
     await logout()
@@ -44,7 +50,7 @@ export function AppLayout() {
         Pular para conteudo principal
       </a>
 
-      <aside className="sidebar">
+      <aside className={`sidebar${isSidebarOpen ? ' open' : ''}`}>
         <h1 className="brand">CRMLead</h1>
         <p className="brand-sub">Frontend TypeScript</p>
         <div className="sidebar-meta-row">
@@ -64,6 +70,7 @@ export function AppLayout() {
               className={({ isActive }) =>
                 `menu-item${isActive ? ' active' : ''}`
               }
+              onClick={() => setIsSidebarOpen(false)}
             >
               {item.label}
             </NavLink>
@@ -82,8 +89,26 @@ export function AppLayout() {
         </div>
       </aside>
 
+      {isSidebarOpen ? (
+        <button
+          className="sidebar-overlay"
+          type="button"
+          aria-label="Fechar menu lateral"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      ) : null}
+
       <div className="content-area">
         <header className="content-topbar" aria-label="Contexto da sessao">
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-label="Abrir menu lateral"
+            aria-expanded={isSidebarOpen}
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+          >
+            Menu
+          </button>
           <p className="content-topbar-item content-topbar-emphasis">Pagina: {currentPage}</p>
           <p className="content-topbar-item">Data: {todayLabel}</p>
           <p className="content-topbar-item">Usuario: {session?.name ?? 'Usuario'}</p>

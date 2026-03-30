@@ -1,4 +1,9 @@
+import { useState } from 'react'
+
+import { Dialog } from '../components/Dialog'
+import { ToastContainer } from '../components/ToastContainer'
 import { useAgendaFeed } from '../features/agenda/useAgendaFeed'
+import { useToast } from '../hooks/useToast'
 import type { EventType } from '../shared/types/crm'
 
 function formatDate(value: string) {
@@ -28,6 +33,12 @@ function eventTone(type: EventType) {
 export function AgendaPage() {
   const { loading, error, upcoming, past, markDone, postponeOneDay } =
     useAgendaFeed()
+  const { toasts, success, error: notifyError, removeToast } = useToast()
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'done' | 'postpone'
+    eventId: string
+    title: string
+  } | null>(null)
 
   const visitas = upcoming.filter((event) => event.type === 'visita').length
   const followups = upcoming.filter((event) => event.type === 'followup').length
@@ -35,6 +46,24 @@ export function AgendaPage() {
   const nextEvent = upcoming
     .slice()
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
+
+  async function confirmPendingAction() {
+    if (!pendingAction) return
+
+    try {
+      if (pendingAction.type === 'done') {
+        await markDone(pendingAction.eventId)
+        success('Evento concluido com sucesso.')
+      } else {
+        await postponeOneDay(pendingAction.eventId)
+        success('Evento adiado em 1 dia.')
+      }
+    } catch {
+      notifyError('Nao foi possivel atualizar o evento. Tente novamente.')
+    } finally {
+      setPendingAction(null)
+    }
+  }
 
   return (
     <main className="layout">
@@ -89,14 +118,26 @@ export function AgendaPage() {
                   <button
                     className="agenda-btn"
                     type="button"
-                    onClick={() => markDone(event.id)}
+                    onClick={() =>
+                      setPendingAction({
+                        type: 'done',
+                        eventId: event.id,
+                        title: event.title,
+                      })
+                    }
                   >
                     Concluir
                   </button>
                   <button
                     className="agenda-btn"
                     type="button"
-                    onClick={() => postponeOneDay(event.id)}
+                    onClick={() =>
+                      setPendingAction({
+                        type: 'postpone',
+                        eventId: event.id,
+                        title: event.title,
+                      })
+                    }
                   >
                     Adiar 1d
                   </button>
@@ -139,6 +180,17 @@ export function AgendaPage() {
           ) : null}
         </div>
       </section>
+
+      <Dialog
+        open={Boolean(pendingAction)}
+        title={pendingAction?.type === 'done' ? 'Concluir evento?' : 'Adiar evento em 1 dia?'}
+        description={pendingAction ? `Evento: ${pendingAction.title}` : undefined}
+        confirmText={pendingAction?.type === 'done' ? 'Concluir' : 'Confirmar adiamento'}
+        cancelText="Cancelar"
+        onConfirm={confirmPendingAction}
+        onClose={() => setPendingAction(null)}
+      />
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </main>
   )
 }
