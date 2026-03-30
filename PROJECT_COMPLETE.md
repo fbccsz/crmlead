@@ -266,7 +266,7 @@ npm run dev
 ### Fase 4 - Features Avançadas (4-5 dias)
 - [ ] WebSocket para real-time
 - [ ] Notificações ao vivo
-- [ ] Relatórios em PDF
+- [ ] Relatórios em PDF (ver [PDF_ROADMAP.md](docs/PDF_ROADMAP.md))
 - [ ] Integração WhatsApp/Email
 
 ### Fase 5 - Deploy (2-3 dias)

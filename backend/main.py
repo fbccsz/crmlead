@@ -9,7 +9,7 @@ import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator, EmailStr
 
 # Simulado em memoria (sera PostgreSQL depois)
 app = FastAPI(title="CRMLead API", version="1.0.0")
@@ -46,8 +46,22 @@ app.add_middleware(
 # ============================================================================
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
+    email: EmailStr
+    password: str = Field(..., min_length=3, description="Senha deve ter no minimo 3 caracteres")
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Email nao pode estar vazio")
+        return v.strip()
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Senha nao pode estar vazia")
+        return v.strip()
 
 
 class UserSession(BaseModel):
@@ -59,22 +73,38 @@ class UserSession(BaseModel):
 
 
 class Lead(BaseModel):
-    id: str
-    name: str
-    stage: str
-    phone: str
-    email: str
-    neighborhood: str
-    budget: float
-    createdAt: str
+    id: str = Field(..., min_length=1, description="ID do lead")
+    name: str = Field(..., min_length=2, max_length=100, description="Nome do cliente")
+    stage: str = Field(..., min_length=2, description="Etapa do funil")
+    phone: str = Field(..., min_length=10, description="Telefone com DDD")
+    email: EmailStr = Field(..., description="Email valido")
+    neighborhood: str = Field(..., min_length=2, description="Bairro")
+    budget: float = Field(..., gt=0, description="Oramento deve ser positivo")
+    createdAt: str = Field(..., description="ISO8601 timestamp")
+
+    @field_validator("stage")
+    @classmethod
+    def validate_stage(cls, v: str) -> str:
+        valid_stages = ["Lead", "Visita Agendada", "Proposta Feita", "Fechado", "Recusado"]
+        if v not in valid_stages:
+            raise ValueError(f"Etapa deve ser uma de: {', '.join(valid_stages)}")
+        return v
 
 
 class Event(BaseModel):
-    id: str
-    title: str
-    type: str
-    date: str
-    clientName: str
+    id: str = Field(..., min_length=1, description="ID do evento")
+    title: str = Field(..., min_length=3, max_length=200, description="Titulo evento")
+    type: str = Field(..., description="Tipo: visita, ligacao, reuniao")
+    date: str = Field(..., description="Data ISO8601")
+    clientName: str = Field(..., min_length=2, description="Nome cliente")
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, v: str) -> str:
+        valid_types = ["visita", "ligacao", "reuniao", "email", "whatsapp"]
+        if v not in valid_types:
+            raise ValueError(f"Tipo deve ser uma de: {', '.join(valid_types)}")
+        return v
 
 
 class DashboardSummary(BaseModel):
@@ -91,7 +121,18 @@ class HealthStatus(BaseModel):
 
 
 class UpdateEventDateInput(BaseModel):
-    date: str
+    date: str = Field(..., description="Nova data ISO8601")
+
+    @field_validator("date")
+    @classmethod
+    def validate_date_format(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Data nao pode estar vazia")
+        try:
+            datetime.fromisoformat(v.replace('Z', '+00:00'))
+        except ValueError:
+            raise ValueError("Data deve estar em formato ISO8601")
+        return v
 
 
 # ============================================================================
@@ -155,7 +196,7 @@ def _build_session(email: str) -> UserSession:
         name="Gestor CRM" if "gestor" in email else "Corretor Demo",
         email=email,
         role="gestor" if "gestor" in email else "corretor",
-        token=f"jwt-token-{datetime.utcnow().timestamp()}",
+        token=f"jwt-token-{datetime.now().timestamp()}",
     )
 
 
@@ -168,16 +209,14 @@ async def health_check():
     return HealthStatus(
         status="ok",
         version="1.0.0",
-        timestamp=datetime.utcnow().isoformat() + "Z",
+        timestamp=datetime.now().isoformat() + "Z",
     )
 
 
 @app.post("/login", response_model=UserSession)
 async def login(credentials: LoginRequest):
-    if not credentials.email or not credentials.password:
-        raise HTTPException(status_code=400, detail="Email e password obrigatorios")
-
-    # Modo demo: aceita qualquer senha nao vazia.
+    # Validacoes Pydantic ja foram executadas
+    # Modo demo: aceita qualquer senha nao vazia
     return _build_session(credentials.email)
 
 
