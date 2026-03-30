@@ -46,7 +46,7 @@ app.add_middleware(
 # ============================================================================
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str = Field(..., min_length=3, description="Senha deve ter no minimo 3 caracteres")
 
     @field_validator("email")
@@ -54,7 +54,16 @@ class LoginRequest(BaseModel):
     def validate_email(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Email nao pode estar vazio")
-        return v.strip()
+        value = v.strip()
+        # Aceita emails de ambiente demo/interno, ex: corretor@crmlead.local.
+        if " " in value or "@" not in value:
+            raise ValueError("Email invalido")
+
+        local_part, domain_part = value.split("@", 1)
+        if not local_part or not domain_part:
+            raise ValueError("Email invalido")
+
+        return value
 
     @field_validator("password")
     @classmethod
